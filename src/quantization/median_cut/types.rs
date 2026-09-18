@@ -1,4 +1,12 @@
 #[derive(Debug)]
 pub enum MedianCutErrors {
-    FailedToInitialize
+    FailedToInitialize,
+    EmptyImagePixels,
+}
+
+#[derive(Clone, Copy)]
+pub enum ColorChannel {
+    R,
+    G,
+    B,
 }

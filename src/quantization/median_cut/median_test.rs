@@ -31,11 +31,11 @@ mod tests {
         let mc = MedianCutAlgorithm::new();
 
         let p_len = 4;
-        let res = mc.GetColors(SRC.to_vec(), p_len).unwrap();
+        let res = mc.get_colors(SRC.to_vec(), p_len).unwrap();
 
         assert_eq!(res.len(), p_len as usize);
     }
-    
+
     #[test]
     fn test_returns_correct_palettes() {
         let mc = MedianCutAlgorithm::new();
@@ -52,7 +52,7 @@ mod tests {
         ];
 
         let p_len = 4;
-        let res = mc.GetColors(SRC.to_vec(), p_len).unwrap();
+        let res = mc.get_colors(SRC.to_vec(), p_len).unwrap();
 
         assert_eq!(res, expected);
     }
