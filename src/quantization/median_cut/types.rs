@@ -4,7 +4,7 @@ pub enum MedianCutErrors {
     EmptyImagePixels,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum ColorAxis {
     R,
     G,

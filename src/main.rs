@@ -21,8 +21,6 @@ fn main() {
 
     let mut map: HashMap<(u8, u8, u8), i64> = HashMap::new();
 
-    let x = img.pixels();
-
     for (_, _, pixel) in img.pixels() {
         if pixel.0.len() > 3 && pixel.0[3] == 0 {
             continue;
