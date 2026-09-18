@@ -5,7 +5,7 @@ pub enum MedianCutErrors {
 }
 
 #[derive(Clone, Copy)]
-pub enum ColorChannel {
+pub enum ColorAxis {
     R,
     G,
     B,

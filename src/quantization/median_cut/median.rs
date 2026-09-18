@@ -1,5 +1,5 @@
 use crate::{
-    quantization::median_cut::types::{ColorChannel, MedianCutErrors},
+    quantization::median_cut::types::{ColorAxis, MedianCutErrors},
     types::rgb::RGB,
 };
 
@@ -10,7 +10,7 @@ impl MedianCutAlgorithm {
         MedianCutAlgorithm {}
     }
 
-    fn getLongestAxisAndVariance(&self, image_pixels: &Vec<RGB>) -> Result<(ColorChannel, f64), MedianCutErrors> {
+    fn getLongestAxisAndVariance(&self, image_pixels: &Vec<RGB>) -> Result<(ColorAxis, f64), MedianCutErrors> {
         if image_pixels.is_empty() {
             return Err( MedianCutErrors::EmptyImagePixels);
         }
@@ -35,17 +35,17 @@ impl MedianCutAlgorithm {
         }
 
         let ranges = [
-            (ColorChannel::R, max.0 - min.0),
-            (ColorChannel::G, max.1 - min.1),
-            (ColorChannel::B, max.2 - min.2),
+            (ColorAxis::R, max.0 - min.0),
+            (ColorAxis::G, max.1 - min.1),
+            (ColorAxis::B, max.2 - min.2),
         ];
 
         let (color, _) = ranges.iter().max_by(|a, b| a.1.cmp(&b.1)).unwrap();
 
         let mut mean = match color {
-            ColorChannel::R => sum.0,
-            ColorChannel::G => sum.1,
-            ColorChannel::B => sum.2,
+            ColorAxis::R => sum.0,
+            ColorAxis::G => sum.1,
+            ColorAxis::B => sum.2,
         };
 
         mean /= image_pixels.len() as i64;
@@ -54,9 +54,9 @@ impl MedianCutAlgorithm {
 
         for p in image_pixels {
             let mut v: i64 = match color {
-                ColorChannel::R => p.r as i64,
-                ColorChannel::G => p.g as i64,
-                ColorChannel::B => p.b as i64,
+                ColorAxis::R => p.r as i64,
+                ColorAxis::G => p.g as i64,
+                ColorAxis::B => p.b as i64,
             };
 
             v -= mean;
