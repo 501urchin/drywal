@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RGB {
     pub r: u8,
@@ -6,6 +7,7 @@ pub struct RGB {
 }
 
 impl RGB {
+    #[allow(dead_code)]
     pub fn new(r: u8, g: u8, b: u8) -> Self {
         RGB { r, g, b }
     }

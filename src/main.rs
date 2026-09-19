@@ -1,62 +1,31 @@
-use image::GenericImageView;
-use std::collections::HashMap;
+use image::{GenericImageView};
+
+use crate::{quantization::median_cut::median, types::rgb::RGB};
 mod quantization;
 mod types;
 
-struct Color {
-    r: u8,
-    g: u8,
-    b: u8,
-    brightness: f64,
-    count: i64,
-}
-
-fn quantize(value: u8, bucket_size: u8) -> u8 {
-    (value / bucket_size) * bucket_size
+fn get_brightnes(c: &RGB) -> f64 {
+    0.299 * c.r as f64 + 0.587 * c.g as f64 + 0.114 * c.b as f64
 }
 
 fn main() {
-    let img = image::open("imaget.png").unwrap();
-    let bucket_size: u8 = 50;
+    let img = image::open("image.png").unwrap();
+    let mut image_rgb: Vec<RGB> = Vec::new();
 
-    let mut map: HashMap<(u8, u8, u8), i64> = HashMap::new();
+    img.pixels()
+        .for_each(|(_, _, pixel)| image_rgb.push(RGB::new(pixel.0[0], pixel.0[1], pixel.0[2])));
 
-    for (_, _, pixel) in img.pixels() {
-        if pixel.0.len() > 3 && pixel.0[3] == 0 {
-            continue;
-        }
+    if image_rgb.is_empty() {
+        panic!("image is empty")
+    };
 
-        let key = (
-            quantize(pixel.0[0], bucket_size),
-            quantize(pixel.0[1], bucket_size),
-            quantize(pixel.0[2], bucket_size),
-        );
-        *map.entry(key).or_insert(0) += 1;
-    }
+    let mut colors = median::MedianCutAlgorithm::new()
+        .get_colors(image_rgb, 8)
+        .unwrap();
 
-    let mut colors: Vec<Color> = map
-        .into_iter()
-        .map(|((r, g, b), count)| Color {
-            r,
-            g,
-            b,
-            brightness: (0.299 * r as f64) + (0.587 * g as f64) + (0.114 * b as f64),
-            count,
-        })
-        .collect();
-
-    colors.sort_by(|a, b| b.count.cmp(&a.count));
-
-    // for c in colors.iter().take(10) {
-    //     println!("{:02X}{:02X}{:02X}", c.r, c.g, c.b);
-    // }
-
-    let mut s1: Vec<&Color> = colors.iter().take(16).collect();
-
-    s1.sort_by(|a, b| a.brightness.partial_cmp(&b.brightness).unwrap());
-
-    for c in s1 {
-        print!("\x1b[48;2;{};{};{}m  \x1b[0m", c.r, c.g, c.b);
-    }
+    colors.sort_by(|a, b| get_brightnes(a).total_cmp(&get_brightnes(&b)));
+    colors
+        .iter()
+        .for_each(|c| print!("\x1b[48;2;{};{};{}m  \x1b[0m", c.r, c.g, c.b));
     println!()
 }

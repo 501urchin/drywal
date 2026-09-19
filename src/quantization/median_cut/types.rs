@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub enum MedianCutErrors {
-    FailedToInitialize,
+    // FailedToInitialize,
     EmptyImagePixels,
 }
 

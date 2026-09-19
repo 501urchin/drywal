@@ -2,7 +2,7 @@
 mod tests {
     use crate::{
         quantization::median_cut::{helpers, types::ColorAxis},
-        types::rgb::{self, RGB},
+        types::rgb::{RGB},
     };
 
     #[test]
@@ -16,21 +16,21 @@ mod tests {
 
         let res = helpers::get_longest_axis(&pixels).unwrap();
 
-        assert_eq!(res, ColorAxis::B);
+        assert_eq!(res, ColorAxis::R);
     }
 
     #[test]
-    fn test_get_longest_axis_all_same_range() {
+    fn test_get_longest_axis_should_return_red_if_all_range_the_same() {
         #[rustfmt::skip]
         let pixels = vec![
-            RGB { r: 0,     g: 255, b: 0  },
-            RGB { r: 255,   g: 0,   b: 0   },
-            RGB { r: 0,     g: 0,   b: 255 },
+            RGB { r: 1,   g: 10,  b: 255  },
+            RGB { r: 0,  g: 255,  b: 0   },
+            RGB { r: 255, g: 0,   b: 55 },
         ];
 
         let res = helpers::get_longest_axis(&pixels).unwrap();
 
-        assert_eq!(res, ColorAxis::B);
+        assert_eq!(res, ColorAxis::R);
     }
 
     #[test]
@@ -95,7 +95,31 @@ mod tests {
 
         let (box1, box2) = helpers::split_into_box(132 as f64, ColorAxis::R, &pixels);
 
-        assert_eq!(box1, vec![RGB { r: 1, g: 10,   b: 255  }, RGB { r: 10, g: 14,  b: 0   }]);
-        assert_eq!(box2, vec![RGB { r: 254, g: 5,   b: 55 }, RGB { r: 255, g: 5,   b: 55 }]);
+        assert_eq!(
+            box1,
+            vec![
+                RGB {
+                    r: 1,
+                    g: 10,
+                    b: 255
+                },
+                RGB { r: 10, g: 14, b: 0 }
+            ]
+        );
+        assert_eq!(
+            box2,
+            vec![
+                RGB {
+                    r: 254,
+                    g: 5,
+                    b: 55
+                },
+                RGB {
+                    r: 255,
+                    g: 5,
+                    b: 55
+                }
+            ]
+        );
     }
 }

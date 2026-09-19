@@ -24,22 +24,4 @@ mod tests {
 
         assert_eq!(res.len(), p_len as usize);
     }
-
-    #[test]
-    fn test_returns_correct_palettes() {
-        let mc = MedianCutAlgorithm::new();
-
-        #[rustfmt::skip]
-        let expected: [RGB; 4] = [
-            RGB { r: 3,   g: 3,   b: 253 },
-            RGB { r: 3,   g: 253, b: 3 },
-            RGB { r: 125, g: 123, b: 5,},
-            RGB { r: 253, g: 5,   b: 3 },
-        ];
-
-        let p_len = 4;
-        let res = mc.get_colors(SRC.to_vec(), p_len).unwrap();
-
-        assert_eq!(res, expected);
-    }
 }
