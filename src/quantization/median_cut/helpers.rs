@@ -49,7 +49,7 @@ pub fn find_median(color_axis: ColorAxis, image_pixels: &Vec<RGB>) -> f64 {
     };
 
     let num_pixels = image_pixels.len() as i64;
-    if num_pixels % 2 == 0 {
+    if num_pixels & 1 == 0 {
         let n2_index = num_pixels / 2;
         let n1_index = n2_index - 1;
 
@@ -65,7 +65,7 @@ pub fn find_median(color_axis: ColorAxis, image_pixels: &Vec<RGB>) -> f64 {
             ColorAxis::B => image_pixels[n2_index as usize].b,
         };
 
-        let median: f64 = (n1 as f64 + n2 as f64) / 2.0; // TODO!: panic here - 
+        let median: f64 = (n1 as f64 + n2 as f64) / 2.0;
 
         median
     } else {
