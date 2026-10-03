@@ -1,82 +1,64 @@
-use clap::Parser;
-use image::GenericImageView;
-use rand::seq::IteratorRandom;
-use std::fs::{metadata, read_dir};
-
-use crate::{quantization::median_cut::median::MedianCutAlgorithm, types::rgb::RGB};
-mod quantization;
+pub mod helpers;
+pub mod quantization;
 mod types;
-
-#[derive(Parser)]
-#[command(
-    name = "drywal",
-    version,
-    about = "extracts the most common colors in a image and applies it system wide"
-)]
-struct DrywalArgs {
-    #[arg(short = 'i', long)]
-    input: String,
-
-    #[arg(short = 'c', long, default_value_t = 16)]
-    colors: i64,
-}
-
-fn random_file_in_dir(dir: &String) -> Option<String> {
-    let mut rng = rand::rng();
-    read_dir(dir)
-        .ok()?
-        .filter_map(|entry| entry.ok())
-        .map(|entry| entry.path())
-        .filter(|path| path.is_file())
-        .choose(&mut rng)
-        .map(|path| path.to_string_lossy().into_owned())
-}
-
-fn get_brightnes(c: &RGB) -> f64 {
-    0.299 * c.r as f64 + 0.587 * c.g as f64 + 0.114 * c.b as f64
-}
+use crate::helpers::{get_colors_from_image_path, random_file_in_dir};
+use minijinja::{Environment, context};
+use std::path::Path;
+use std::{fs};
+mod macros;
+use std::fs::metadata;
+mod cli;
+use crate::cli::parse_args;
 
 fn main() {
-    let cli = DrywalArgs::parse();
+    let cli = parse_args();
 
-    let md = match metadata(&cli.input) {
-        Ok(v) => v,
-        Err(e) => {
-            println!("failed to parse input: {}", e);
-            return;
+    let meta_data = iferr!(metadata(&cli.input));
+    let input_file = either!(meta_data.is_dir() => random_file_in_dir(&cli.input).expect("no files found in directory") ; cli.input );
+    let colors = get_colors_from_image_path(input_file.clone(), cli.colors, cli.resize).unwrap();
+
+    if cli.preview {
+        helpers::print_colors(&colors);
+    }
+
+    let env = Environment::new();
+    let base = Path::new(&cli.outpath);
+
+    for entry in fs::read_dir(&cli.tpath).unwrap() {
+        let path = entry.unwrap().path();
+        if !path.is_file() {
+            continue;
         }
-    };
 
-    let input_file: String = if md.is_dir() {
-        random_file_in_dir(&cli.input).expect("no files found in directory")
-    } else {
-        cli.input
-    };
+        let name = path.file_name().unwrap();
+        let out_path = base.join(name);
 
-    println!("\n{}", input_file);
-    let res = match image::open(input_file.clone()) {
-        Ok(v) => v,
-        Err(e) => {
-            println!("failed to open image: {}", e);
-            return;
-        }
-    };
 
-    let q = MedianCutAlgorithm::new();
+        let src = fs::read_to_string(path).unwrap();
+        let out = env
+            .render_str(
+                &src,
+                context! {
+                    color0  => colors[0],
+                    color1  => colors[1],
+                    color2  => colors[2],
+                    color3  => colors[3],
+                    color4  => colors[4],
+                    color5  => colors[5],
+                    color6  => colors[6],
+                    color7  => colors[7],
+                    color8  => colors[8],
+                    color9  => colors[9],
+                    color10 => colors[10],
+                    color11 => colors[11],
+                    color12 => colors[12],
+                    color13 => colors[13],
+                    color14 => colors[14],
+                    color15 => colors[15],
+                },
+            )
+            .unwrap();
 
-    let mut colors = q
-        .get_colors(
-            res.pixels()
-                .map(|(_, _, p)| RGB::new(p.0[0], p.0[1], p.0[2]))
-                .collect(),
-            cli.colors,
-        )
-        .unwrap();
-
-    colors.sort_by(|a, b| get_brightnes(&a).total_cmp(&get_brightnes(b)));
-
-    colors
-        .iter()
-        .for_each(|c| print!("\x1b[48;2;{};{};{}m  \x1b[0m", c.r, c.g, c.b));
-    println!("");
+        fs::write(out_path, out).unwrap();
+    }
 }
